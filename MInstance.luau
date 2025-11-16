@@ -348,7 +348,7 @@ ReverseInstanceMap = function(Map, ParentOfInstance, DeserializeMeshPartsProperl
 	local Properties = Map.P
 	local Children = Map.K
 	local Attributes = Map.A
-	local CallbackFunction = Map.Callback
+	local CallbackTable = Map.Callbacks
 	local InternalPropertyHooks = EMPTY_TABLE
 	local UseInternalPropertyHooks = false -- CPU CYCLES MUST NOT GO TO WASTE!!
 	local CreationHook = InstanceCreationInternalHooks[ClassName]
@@ -395,8 +395,10 @@ ReverseInstanceMap = function(Map, ParentOfInstance, DeserializeMeshPartsProperl
 	
 	TemporaryCacheTable[Map] = MainInstance
 	
-	if CallbackFunction then
-		CallbackFunction(MainInstance)
+	if CallbackTable then
+		for _,func in CallbackTable do
+			func(MainInstance)
+		end
 	end
 
 	if ParentOfInstance then
@@ -458,8 +460,14 @@ ReverseInstanceMap = function(Map, ParentOfInstance, DeserializeMeshPartsProperl
 						if CachedInstance then
 							SafelySetProperty(PropertyName, CachedInstance)
 						else
-							CurrentlyPointingTo.Callback = function(GotInstance)
+							local function callback(GotInstance)
 								SafelySetProperty(PropertyName, GotInstance)
+							end
+							
+							if CurrentlyPointingTo.Callbacks then
+								table.insert(CurrentlyPointingTo.Callbacks,callback)
+							else
+								CurrentlyPointingTo.Callbacks = {callback}
 							end
 						end
 					else
