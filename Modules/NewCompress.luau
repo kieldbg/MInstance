@@ -31,14 +31,14 @@ local Cache = setmetatable({}, {
 	end
 })
 
-Compressor.Compress = function(String)
+Compressor.Compress = function(String, CompressionLevel)
 	local Cached = Cache[String]
 
 	if Cached then
 		return Cached
 	end
 
-	local Compressed = ZStd.Compress(String)
+	local Compressed = ZStd.Compress(String, CompressionLevel)
 
 	Cache[String] = Compressed
 
