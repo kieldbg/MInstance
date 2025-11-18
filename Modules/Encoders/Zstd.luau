@@ -1,30 +1,25 @@
 local HttpService = game:GetService("HttpService")
-local Base64 = require(script.Parent.Base64)
+local EncodingService = game:GetService("EncodingService")
 local Zstd = {}
 
-Zstd.Compress = function(String)
-	local Compressed = buffer.fromstring(String)
-	local Encoded = HttpService:JSONEncode(Compressed)
-	local zB64 = Encoded:match('"zbase64":"(.-)"')
-	local B64 = Encoded:match('"base64":"(.-)"')
+Zstd.CompressBuffer = function(Buffer, CompressionLevel)
+	return EncodingService:CompressBuffer(Buffer, Enum.CompressionAlgorithm.Zstd, CompressionLevel)
+end
+
+Zstd.DecompressBuffer = function(Buffer)
+	return EncodingService:DecompressBuffer(Buffer, Enum.CompressionAlgorithm.Zstd)
+end
+
+Zstd.Compress = function(String, CompressionLevel)
+	local Buffer = buffer.fromstring(String)
 	
-	if B64 then
-		return error("String passed is too short to compress.")
-	end
-	
-	if zB64 then
-		return buffer.tostring(Base64.decode(buffer.fromstring(zB64)))
-	end
-	
-	return error("Failed to utilize Roblox's internal zstd compression algorithm by JSONEncoding a buffer. If you get this error, this feature may not be removed.")
+	return buffer.tostring(Zstd.CompressBuffer(Buffer, CompressionLevel))
 end
 
 Zstd.Decompress = function(String)
-	local Encoded = Base64.encode(buffer.fromstring(String))
-	local ReconstructedJSON = [[{"m": null, "t": "buffer", "zbase64": "]] .. buffer.tostring(Encoded) .. [["}]]
-	local OriginalBuffer = HttpService:JSONDecode(ReconstructedJSON)
-	
-	return buffer.tostring(OriginalBuffer)
+	local Buffer = buffer.fromstring(String)
+
+	return buffer.tostring(Zstd.DecompressBuffer(Buffer))
 end
 
 return Zstd
