@@ -12,6 +12,7 @@ local bit32_bor=bit32.bor
 local bit32_lshift=bit32.lshift
 local bit32_rshift=bit32.rshift
 local bit32_band=bit32.band
+local math_ceil=math.ceil
 
 local DIRECT_LOOKUP = {}
 local BIT_MASK = {}
@@ -42,7 +43,7 @@ end
 function Base94.encode(input: buffer): buffer
 	local length = buffer_len(input)
 	
-	local output = buffer_create(math.ceil(length * 1.25) + 2)
+	local output = buffer_create(math_ceil(length * 1.25) + 2)
 
 	local counter = 0
 	local bits = 0
